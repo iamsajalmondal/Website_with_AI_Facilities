@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>πCake Learning Dashboard</title>
+    <!-- Google Font: Roboto -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- Link to CSS -->
+    <link rel="stylesheet" href="static/design.css"> <!-- Adjust path if necessary -->
+</head>
+
+<body class="dashboard-body">
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <img src="static/images/company.png" alt="Sidebar Image" class="sidebar-image">
+            <div class="logo"></div>
+            <nav>
+                <ul class="menu">
+                    <li class="active"><i class="icon">🏠</i> Home</li>
+                    <li><i class="icon">📚</i> My Courses</li>
+                    <li><i class="icon">📈</i> Progress</li>
+                    <li><i class="icon">🎮</i> Gamification</li>
+                    <li><i class="icon">📄</i> Resources</li>
+                    <li><a href="{{ url_for('ai_assistant') }}"><i class="icon">🤖</i> AI Assistant</a></li>
+                    <li><i class="icon">🔔</i> Notifications</li>
+                    <li><i class="icon">⚙️</i> Settings</li>
+                    <!-- Add a form for logout -->
+                    <form action="{{ url_for('logout') }}" method="POST" style="display:inline;">
+                        <li><button type="submit" class="logout-btn"><i class="icon">🔓</i> Logout</button></li>
+                    </form>
+                </ul>
+            </nav>
+            <div class="help">
+                <i class="icon">❓</i> Help & Support
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header">
+                <!-- User Profile -->
+                <div class="user-profile">
+                    <img src="static/images/sajal.png" alt="User Avatar" class="user-avatar">
+                    <span class="username">Sajal</span>
+                </div>
+        
+                <!-- Theme Toggle -->
+                <div class="theme-toggle">
+                    <span class="light-mode">☀️</span>
+                </div>
+        
+                <!-- Right Side Image -->
+                <div class="right-image">
+                    <img src="static/images/robo.png" alt="Right Side Image">
+                </div>
+            </header>
+
+            <div class="welcome-section">
+                <div class="welcome-message">
+                    <span>01 JAN 2025</span>
+                    <h1>Welcome Back!</h1>
+                    <p>HERE'S YOUR GOAL FOR TODAY</p>
+                </div>
+                <div class="welcome-image">
+                    <img src="static/images/robot.png" alt="Welcome Image">
+                </div>
+            </div>
+
+            <div class="content-grid">
+                <!-- Ongoing Courses Section -->
+                <section class="ongoing-courses">
+                    <h2>Ongoing Courses</h2>
+                    <div class="course-card">
+                        <video class="course-video" autoplay loop muted>
+                            <source src="static/videos/education.mp4" type="video/mp4">
+                        </video>
+                        <div class="course-details">
+                            <h3>Introduction to 3D Design</h3>
+                            <p class="instructor">Olivia Wilson | Expert 3D Designer</p>
+                            
+
+                            <!-- Progress Bar Section -->
+                            <div class="progress-container">
+                                <div class="progress-bar" style="width: 70%;"></div>
+                                <span class="progress-text">70% Complete</span>
+                            </div>
+                            
+                            <p class="time-remaining">4 hours 25 minutes left</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Daily Goals Section -->
+                <section class="daily-goals">
+                    <h2>Daily Goals</h2>
+                    <ul class="goal-list">
+                        <li class="goal-item">
+                            <input type="checkbox" id="goal1" checked>
+                            <label for="goal1">Complete Lesson 1 of Course X</label>
+                        </li>
+                    </ul>
+                    <div class="ai-suggestion">
+                        <h3>AI Feedback, Suggestion</h3>
+                        <p>Try reviewing last lesson's key points for better understanding. Focus on solving practical problems.</p>
+                    </div>
+                </section>
+
+                <!-- Gamification Section -->
+                <section class="gamification">
+                    <h2>Gamification Area</h2>
+                    <div class="gamification-container">
+                        <!-- Badges Earned Section -->
+                        <div class="badges-section">
+                            <h3>Badges Earned</h3>
+                            <div class="badges-container">
+                                <span class="badge gold">🏅</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Leaderboard Section -->
+                        <div class="leaderboard-section">
+                            <h3>Leaderboard</h3>
+                            <div class="leaderboard-progress">
+                                <div class="progress-bar" style="width: 30%;">
+                                    <span class="progress-text">30%</span>
+                                </div>
+                                <div class="progress-bar" style="width: 50%;">
+                                    <span class="progress-text">50%</span>
+                                </div>
+                                <div class="progress-bar" style="width: 70%;">
+                                    <span class="progress-text">70%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
+            </div>
+
+        </main>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>AI Career Advisor</title>
+    <style>
+        .chat-input-container {
+            position: relative;
+        }
+
+        #messageInput {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+
+        #voiceBtn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .chat-box {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        /* Profile Icon and Dropdown Menu */
+        .profile-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .profile-icon {
+            width: 40px;
+            height: 40px;
+            background-color: #3498db;
+            border-radius: 50%;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            line-height: 40px;
+            margin-right: 10px;
+        }
+
+        .profile-dropdown {
+            display: none;
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background-color: white;
+            border: 1px solid #ddd;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 150px;
+            border-radius: 5px;
+        }
+
+        .profile-dropdown a {
+            padding: 10px;
+            text-decoration: none;
+            color: #333;
+            display: block;
+            font-size: 14px;
+        }
+
+        .profile-dropdown a:hover {
+            background-color: #f1f1f1;
+        }
+
+        .profile-container:hover .profile-dropdown {
+            display: block;
+        }
+
+        .edit-chat-name {
+            display: none;
+            margin-top: 10px;
+            margin-left: 5px;
+        }
+
+        .chat-history-item {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="chatbot-body">
+    <div class="chatbot-container">
+        <div class="sidebar">
+            <h2>Message History</h2>
+            <ul>
+                {% for chat_name in message_history.keys() %}
+                    <li class="chat-history-item" id="chat-{{ chat_name }}" onclick="switchChat('{{ chat_name }}')" ondblclick="startRename('{{ chat_name }}')">
+                        <span class="chat-name" id="name-{{ chat_name }}">{{ chat_name }}</span>
+                        <div class="dropdown">
+                            <button class="dropbtn">...</button>
+                            <div class="dropdown-content">
+                                <a href="{{ url_for('download_chat', chat_name=chat_name) }}">Download</a>
+                                <a href="{{ url_for('delete_chat', chat_name=chat_name) }}">Delete</a>
+                                <a href="javascript:void(0);" onclick="startRename('{{ chat_name }}')">Rename</a> <!-- Rename Button -->
+                            </div>
+                        </div>
+
+                        <!-- Inline Rename Input -->
+                        <div class="edit-chat-name" id="rename-{{ chat_name }}">
+                            <input type="text" id="rename-input-{{ chat_name }}" value="{{ chat_name }}" onkeydown="if(event.key === 'Enter') { saveRename('{{ chat_name }}') }">
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+            <button onclick="window.location.href = '{{ url_for('new_chat') }}'">New Chat</button>
+        </div>
+
+        <!-- Chat Area -->
+        <div class="chat-area">
+            <!-- Back Button -->
+<div class="back-button-container">
+    <button onclick="window.location.href = '{{ url_for('index') }}'" class="back-btn">← Back to Home</button>
+</div>
+
+            <h1>LaaNa AI Career Advisor 🤖</h1>
+            <div class="chat-box">
+                {% if chat_name %}
+                    {% for message in message_history[chat_name] %}
+                        <p>{{ message }}</p>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <!-- Chat Form with Message Box and Mic Button -->
+            <form method="POST" id="chatForm">
+                <div class="chat-input-container">
+                    <input type="text" name="message" id="messageInput" placeholder="Type your message..." required>
+                    <button type="submit" style="display: none;"></button>
+                    <button type="button" id="voiceBtn">🎙️</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+
+    <script>
+        // Function to switch to the clicked chat
+        function switchChat(chatName) {
+            window.location.href = '/chatbot/' + chatName;
+        }
+
+        // Function to start renaming the chat name
+        function startRename(chatName) {
+            // Hide the chat name and show the rename input field
+            document.getElementById('name-' + chatName).style.display = 'none';
+            document.getElementById('rename-' + chatName).style.display = 'block';
+            document.getElementById('rename-input-' + chatName).focus(); // Focus on the input field
+        }
+
+        // Function to save the new chat name
+        function saveRename(chatName) {
+            var newName = document.getElementById('rename-input-' + chatName).value;
+            if (newName.trim() && newName !== chatName) {
+                var encodedName = encodeURIComponent(newName);
+                window.location.href = '/rename_chat/' + chatName + '?new_name=' + encodedName;
+            } else {
+                document.getElementById('name-' + chatName).style.display = 'inline';
+                document.getElementById('rename-' + chatName).style.display = 'none';
+            }
+        }
+
+        let currentSpeech = null;
+    
+        // Check if the browser supports SpeechRecognition
+        if ('webkitSpeechRecognition' in window) {
+            const recognition = new webkitSpeechRecognition();
+            recognition.lang = 'en-US';
+            recognition.continuous = false;
+            recognition.interimResults = false;
+    
+            document.getElementById('voiceBtn').addEventListener('click', function() {
+                recognition.start();  // Start recognition when the button is clicked
+            });
+    
+            recognition.onresult = function(event) {
+                const transcript = event.results[0][0].transcript;
+                document.getElementById('messageInput').value = transcript;
+    
+                // Check if the spoken word is "exit" and stop the voice
+                if (transcript.toLowerCase() === 'exit') {
+                    window.speechSynthesis.cancel();  // Stop any ongoing speech
+                    return;  // Don't speak anything further
+                }
+    
+                // Otherwise, speak the spoken response
+                speakText(transcript);
+            };
+    
+            recognition.onerror = function(event) {
+                console.error("Speech Recognition Error:", event.error);
+            };
+        } else {
+            alert("Speech recognition is not supported in this browser.");
+        }
+    
+        // Function to speak the bot's response aloud
+        function speakText(text) {
+            // Stop any ongoing speech if present
+            if (currentSpeech) {
+                window.speechSynthesis.cancel();
+            }
+    
+            // If the user typed "exit", stop the voice and do not speak further
+            if (text.toLowerCase() === "exit") {
+                window.speechSynthesis.cancel();  // Stop any ongoing speech
+                return;  // Don't speak the response
+            }
+    
+            // Speak the text if it's not "exit"
+            currentSpeech = new SpeechSynthesisUtterance(text);
+            currentSpeech.lang = "en-US"; // Set language to English
+            window.speechSynthesis.speak(currentSpeech);
+        }
+    
+        // Handle Enter key press to submit the form
+        document.getElementById('messageInput').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                document.getElementById('chatForm').submit();
+            }
+        });
+    
+        // Stop voice if the user types "exit" in the input
+        document.getElementById('messageInput').addEventListener('input', function() {
+            const messageInput = document.getElementById('messageInput').value.toLowerCase();
+            if (messageInput === 'exit') {
+                window.speechSynthesis.cancel(); // Stop any ongoing speech
+            }
+        });
+    
+        // After receiving the bot's response, speak it aloud if not "exit"
+        {% if bot_response %}
+            const botResponse = "{{ bot_response }}";
+            if (botResponse.toLowerCase() !== "exit") {
+                speakText(botResponse);
+            }
+        {% endif %}
+    </script>
+</body>
+</html>
